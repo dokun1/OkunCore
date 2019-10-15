@@ -10,7 +10,7 @@ extension OkunCore {
     public class Manager: NSObject, CLLocationManagerDelegate {
       private var locationManager: CLLocationManager?
       public var lastLoggedLocation: CLLocation?
-      var delegate: LocationManagerDelegate?
+      public var delegate: LocationManagerDelegate?
       var id = UUID()
       
       public override init() {
