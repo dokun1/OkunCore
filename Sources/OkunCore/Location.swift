@@ -1,7 +1,7 @@
 import Foundation
 import MapKit
 
-public protocol LocationManagerDelegate {
+public protocol LocationManagerDelegate: class {
   func manager(_ id: UUID, didReceiveFirst location: CLLocationCoordinate2D)
 }
 
