@@ -17,7 +17,7 @@ extension OkunCore {
         super.init()
         self.locationManager = CLLocationManager()
         if let manager = self.locationManager {
-          manager.requestAlwaysAuthorization()
+          manager.requestWhenInUseAuthorization()
           if CLLocationManager.locationServicesEnabled() {
             manager.desiredAccuracy = kCLLocationAccuracyBest
             lastLoggedLocation = nil
