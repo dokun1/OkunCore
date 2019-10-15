@@ -13,7 +13,7 @@ extension OkunCore {
       var delegate: LocationManagerDelegate?
       var id = UUID()
       
-      override init() {
+      public override init() {
         super.init()
         self.locationManager = CLLocationManager()
         if let manager = self.locationManager {
