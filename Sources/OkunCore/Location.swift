@@ -2,7 +2,7 @@ import Foundation
 import MapKit
 
 public protocol LocationManagerDelegate {
-  func manager(_ id: UUID, didReceiveFirst location: CLLocationCoordinate2D)
+  func manager(_ id: UUID, didReceive location: CLLocationCoordinate2D)
 }
 
 extension OkunCore {
@@ -33,7 +33,7 @@ extension OkunCore {
           }
           if self.lastLoggedLocation == nil {
             self.lastLoggedLocation = location
-            delegate?.manager(self.id, didReceiveFirst: location.coordinate)
+            delegate?.manager(self.id, didReceive: location.coordinate)
           }
         }
       }
