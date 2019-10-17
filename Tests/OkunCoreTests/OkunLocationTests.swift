@@ -15,7 +15,6 @@ struct LocationManagerMock: LocationManagerInterface {
     guard let location = locationToReturn?() else {
       return
     }
-    
     locationManagerDelegate?.manager(UUID(), didUpdateLocations: [location])
   }
 }
@@ -39,16 +38,17 @@ final class OkunLocationTests: XCTestCase {
       return CLLocation(latitude: 10.0, longitude: 10.0)
     }
     
-    let manager = OkunCore.Location.Manager(locationManager: mock)
+    let manager = OkunCore.Location.Manager(locationManagerMock: mock)
     
     let expectedLocation = CLLocation(latitude: 10.0, longitude: 10.0)
-    let expectation = XCTestExpectation(description: "expected location to be returned")
+    let expectation = XCTestExpectation(description: "strings are equal")
     
     manager.getCurrentLocation { location in
       expectation.fulfill()
       XCTAssertEqual(location.coordinate.latitude, expectedLocation.coordinate.latitude, "latitudes should be equal")
       XCTAssertEqual(location.coordinate.longitude, expectedLocation.coordinate.longitude, "longitude should be equal")
     }
+    wait(for: [expectation], timeout: 5)
   }
   
   static var allTests = [

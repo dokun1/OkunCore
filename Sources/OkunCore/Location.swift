@@ -34,9 +34,8 @@ extension OkunCore {
         self.locationManager.requestWhenInUseAuthorization()
       }
       
-      
-      init(locationManager: LocationManagerInterface = CLLocationManager()) {
-        self.locationManager = locationManager
+      init(locationManagerMock: LocationManagerInterface) {
+        self.locationManager = locationManagerMock
         super.init()
         self.locationManager.requestWhenInUseAuthorization()
       }
