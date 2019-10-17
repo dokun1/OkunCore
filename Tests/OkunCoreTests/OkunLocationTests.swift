@@ -2,18 +2,21 @@ import XCTest
 import MapKit
 @testable import OkunCore
 
-final class LocationTestDelegate: LocationManagerDelegate {
-  var expectation: XCTestExpectation?
-  var result = false
+struct LocationManagerMock: LocationManagerInterface {
+  func requestWhenInUseAuthorization() {
+    print("requested")
+  }
   
-  func manager(_ id: UUID, didReceive location: CLLocationCoordinate2D) {
-    print("location: \(location)")
-    guard let expectation = expectation else {
-      XCTFail("Expectation not correctly set")
+  var locationManagerDelegate: LocationManagerDelegate?
+  var desiredAccuracy: CLLocationAccuracy = 0
+  var locationToReturn: (() -> CLLocation)?
+  
+  func requestLocation() {
+    guard let location = locationToReturn?() else {
       return
     }
-    result = true
-    expectation.fulfill()
+    
+    locationManagerDelegate?.manager(UUID(), didUpdateLocations: [location])
   }
 }
 
@@ -30,25 +33,28 @@ final class OkunLocationTests: XCTestCase {
     XCTAssertNotEqual(manager1.id, manager2.id, "Two discretely created managers should have unique IDs")
   }
   
-  func testManagerLogsLocation() {
-    let delegate = LocationTestDelegate()
-    let expectation = XCTestExpectation(description: "Location is reported fully by a location manager.")
-    delegate.expectation = expectation
-    let manager = OkunCore.Location.Manager()
-    manager.delegate = delegate
+  func testNewManagerLogsLocation() {
+    var mock = LocationManagerMock()
+    mock.locationToReturn = {
+      return CLLocation(latitude: 10.0, longitude: 10.0)
+    }
     
-    waitForExpectations(timeout: 5) { error in
-      if let error = error {
-        XCTFail("Error occurred: \(error.localizedDescription)")
-      }
-      XCTAssertTrue(delegate.result, "Result was never changed because location was never reported.")
+    let manager = OkunCore.Location.Manager(locationManager: mock)
+    
+    let expectedLocation = CLLocation(latitude: 10.0, longitude: 10.0)
+    let expectation = XCTestExpectation(description: "expected location to be returned")
+    
+    manager.getCurrentLocation { location in
+      expectation.fulfill()
+      XCTAssertEqual(location.coordinate.latitude, expectedLocation.coordinate.latitude, "latitudes should be equal")
+      XCTAssertEqual(location.coordinate.longitude, expectedLocation.coordinate.longitude, "longitude should be equal")
     }
   }
   
   static var allTests = [
     ("testManagerExists", testManagerExists),
     ("testUniqueManagers", testUniqueManagers),
-    ("testManagerLogsLocation", testManagerLogsLocation)
+    ("testNewManagerLogsLocation", testNewManagerLogsLocation)
   ]
 }
 
