@@ -1,11 +1,11 @@
 import Foundation
 import MapKit
 
-public protocol LocationManagerDelegate: class {
+protocol LocationManagerDelegate: class {
   func manager(_ id: UUID, didUpdateLocations locations: [CLLocation])
 }
 
-public protocol LocationManagerInterface {
+protocol LocationManagerInterface {
     var locationManagerDelegate: LocationManagerDelegate? { get set }
     var desiredAccuracy: CLLocationAccuracy { get set }
     func requestLocation()
@@ -18,7 +18,7 @@ extension OkunCore {
     /// Returns a consistent location for ease of tracking user location in iOS app.
     public class Manager: NSObject, LocationManagerDelegate, CLLocationManagerDelegate {
       private var locationManager: LocationManagerInterface
-      public var delegate: LocationManagerDelegate?
+      var delegate: LocationManagerDelegate?
       private var currentLocationCallback: ((CLLocation) -> Void)?
       var id = UUID()
       
@@ -29,7 +29,13 @@ extension OkunCore {
       }
       
       /// Creates a new instance of  `Manager`, which sets up convenient location tracking for an iOS app.
-      public init(locationManager: LocationManagerInterface = CLLocationManager()) {
+      public override init() {
+        self.locationManager = CLLocationManager()
+        self.locationManager.requestWhenInUseAuthorization()
+      }
+      
+      
+      init(locationManager: LocationManagerInterface = CLLocationManager()) {
         self.locationManager = locationManager
         super.init()
         self.locationManager.requestWhenInUseAuthorization()
@@ -51,7 +57,7 @@ extension OkunCore {
 }
 
 extension CLLocationManager: LocationManagerInterface {
-  public var locationManagerDelegate: LocationManagerDelegate? {
+  var locationManagerDelegate: LocationManagerDelegate? {
     get { delegate as! LocationManagerDelegate? }
     set { delegate = newValue as! CLLocationManagerDelegate? }
   }
