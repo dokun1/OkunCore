@@ -22,7 +22,7 @@ extension OkunCore {
       private var currentLocationCallback: ((CLLocation) -> Void)?
       var id = UUID()
       
-      func getCurrentLocation(completion: @escaping (CLLocation) -> Void) {
+      public func getCurrentLocation(completion: @escaping (CLLocation) -> Void) {
         currentLocationCallback = { location in
           completion(location)
         }
