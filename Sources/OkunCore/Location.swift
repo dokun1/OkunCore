@@ -19,12 +19,14 @@ extension OkunCore {
     public class Manager: NSObject, LocationManagerDelegate {
       private var locationManager: LocationManagerInterface
       private var currentLocationCallback: ((CLLocation) -> Void)?
+      var delegate: CLLocationManagerDelegate?
       var id = UUID()
       
       /// Creates a new instance of  `Manager`, which sets up convenient location tracking for an iOS app.
       public override init() {
         self.locationManager = CLLocationManager()
         super.init()
+        self.delegate = self
         self.locationManager.requestWhenInUseAuthorization()
       }
       
