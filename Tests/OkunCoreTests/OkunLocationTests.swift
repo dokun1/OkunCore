@@ -1,21 +1,25 @@
 import XCTest
 import MapKit
+import OkunCore
 @testable import OkunCore
 
+var mock = LocationManagerMock()
+let manager = OkunCore.Location.Manager(locationManagerMock: mock)
+
 struct LocationManagerMock: LocationManagerInterface {
+  var locationManagerDelegate: LocationManagerDelegate?
+  
   func requestWhenInUseAuthorization() {
-    print("requested")
+    print("requested when in use authorization")
   }
   
-  var locationManagerDelegate: LocationManagerDelegate?
-  var desiredAccuracy: CLLocationAccuracy = 0
-  var locationToReturn: (() -> CLLocation)?
+  var desiredAccuracy: CLLocationAccuracy = kCLLocationAccuracyBest
+  var locationToReturn = {
+    return CLLocation(latitude: 10.0, longitude: 10.0)
+  }
   
   func requestLocation() {
-    guard let location = locationToReturn?() else {
-      return
-    }
-    locationManagerDelegate?.manager(UUID(), didUpdateLocations: [location])
+    manager.manager(manager, didUpdateLocations: [locationToReturn()])
   }
 }
 
@@ -33,15 +37,11 @@ final class OkunLocationTests: XCTestCase {
   }
   
   func testNewManagerLogsLocation() {
-    var mock = LocationManagerMock()
-    mock.locationToReturn = {
-      return CLLocation(latitude: 10.0, longitude: 10.0)
-    }
-    mock.locationManagerDelegate = self
+    let mock = LocationManagerMock()
+
     let manager = OkunCore.Location.Manager(locationManagerMock: mock)
-    
     let expectedLocation = CLLocation(latitude: 10.0, longitude: 10.0)
-    let expectation = XCTestExpectation(description: "strings are equal")
+    let expectation = XCTestExpectation(description: "location was returned.")
     
     manager.getCurrentLocation { location in
       expectation.fulfill()
@@ -57,12 +57,3 @@ final class OkunLocationTests: XCTestCase {
     ("testNewManagerLogsLocation", testNewManagerLogsLocation)
   ]
 }
-
-extension OkunLocationTests: LocationManagerDelegate {
-  func manager(_ id: UUID, didUpdateLocations locations: [CLLocation]) {
-    print("something")
-  }
-  
-  
-}
-

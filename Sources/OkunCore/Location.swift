@@ -2,7 +2,7 @@ import Foundation
 import MapKit
 
 protocol LocationManagerDelegate: class {
-  func manager(_ id: UUID, didUpdateLocations locations: [CLLocation])
+  func manager(_ manager: OkunCore.Location.Manager, didUpdateLocations locations: [CLLocation])
 }
 
 protocol LocationManagerInterface {
@@ -16,9 +16,8 @@ extension OkunCore {
   public struct Location {
     
     /// Returns a consistent location for ease of tracking user location in iOS app.
-    public class Manager: NSObject, LocationManagerDelegate, CLLocationManagerDelegate {
+    public class Manager: NSObject, LocationManagerDelegate {
       private var locationManager: LocationManagerInterface
-      var delegate: LocationManagerDelegate?
       private var currentLocationCallback: ((CLLocation) -> Void)?
       var id = UUID()
       
@@ -42,24 +41,32 @@ extension OkunCore {
         self.locationManager.requestLocation()
       }
 
-      public func manager(_ id: UUID, didUpdateLocations locations: [CLLocation]) {
+      func manager(_ manager: OkunCore.Location.Manager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else {
           return
         }
-        self.currentLocationCallback?(location)
+        if let callback = currentLocationCallback {
+          callback(location)
+        }
         self.currentLocationCallback = nil
-      }
-      
-      public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        self.manager(self.id, didUpdateLocations: locations)
       }
     }
   }
 }
 
+extension OkunCore.Location.Manager: CLLocationManagerDelegate {
+  public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    self.manager(self.locationManager as! OkunCore.Location.Manager, didUpdateLocations: locations)
+  }
+}
+
 extension CLLocationManager: LocationManagerInterface {
   var locationManagerDelegate: LocationManagerDelegate? {
-    get { delegate as! LocationManagerDelegate? }
-    set { delegate = newValue as! CLLocationManagerDelegate? }
+    get {
+      return delegate as! LocationManagerDelegate?
+    }
+    set {
+      delegate = newValue as! CLLocationManagerDelegate?
+    }
   }
 }
