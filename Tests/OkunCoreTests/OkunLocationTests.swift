@@ -37,7 +37,7 @@ final class OkunLocationTests: XCTestCase {
     mock.locationToReturn = {
       return CLLocation(latitude: 10.0, longitude: 10.0)
     }
-    
+    mock.locationManagerDelegate = self
     let manager = OkunCore.Location.Manager(locationManagerMock: mock)
     
     let expectedLocation = CLLocation(latitude: 10.0, longitude: 10.0)
@@ -56,5 +56,13 @@ final class OkunLocationTests: XCTestCase {
     ("testUniqueManagers", testUniqueManagers),
     ("testNewManagerLogsLocation", testNewManagerLogsLocation)
   ]
+}
+
+extension OkunLocationTests: LocationManagerDelegate {
+  func manager(_ id: UUID, didUpdateLocations locations: [CLLocation]) {
+    print("something")
+  }
+  
+  
 }
 

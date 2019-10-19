@@ -6,10 +6,10 @@ protocol LocationManagerDelegate: class {
 }
 
 protocol LocationManagerInterface {
-    var locationManagerDelegate: LocationManagerDelegate? { get set }
-    var desiredAccuracy: CLLocationAccuracy { get set }
-    func requestLocation()
-    func requestWhenInUseAuthorization()
+  var locationManagerDelegate: LocationManagerDelegate? { get set }
+  var desiredAccuracy: CLLocationAccuracy { get set }
+  func requestLocation()
+  func requestWhenInUseAuthorization()
 }
 
 extension OkunCore {
@@ -22,15 +22,10 @@ extension OkunCore {
       private var currentLocationCallback: ((CLLocation) -> Void)?
       var id = UUID()
       
-      public func getCurrentLocation(completion: @escaping (CLLocation) -> Void) {
-        currentLocationCallback = { location in
-          completion(location)
-        }
-      }
-      
       /// Creates a new instance of  `Manager`, which sets up convenient location tracking for an iOS app.
       public override init() {
         self.locationManager = CLLocationManager()
+        super.init()
         self.locationManager.requestWhenInUseAuthorization()
       }
       
@@ -40,6 +35,13 @@ extension OkunCore {
         self.locationManager.requestWhenInUseAuthorization()
       }
       
+      public func getCurrentLocation(completion: @escaping (CLLocation) -> Void) {
+        currentLocationCallback = { location in
+          completion(location)
+        }
+        self.locationManager.requestLocation()
+      }
+
       public func manager(_ id: UUID, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else {
           return
