@@ -21,10 +21,19 @@ class NetworkSessionMock: NetworkSession {
   func loadData(from url: URL, completionHandler: @escaping (Data?, Error?) -> Void) {
     completionHandler(data, error)
   }
+  
+  func sendData(with request: URLRequest, completionHandler: @escaping (Data?, Error?) -> Void) {
+    completionHandler(data, error)
+  }
+}
+
+struct MockData: Codable, Equatable {
+  var id: Int
+  var name: String
 }
 
 final class OkunNetworkingTests: XCTestCase {
-  func testNetworkingCall() {
+  func testGetCall() {
     let session = NetworkSessionMock()
     let manager = OkunCore.Networking.Manager(session: session)
     
@@ -33,7 +42,7 @@ final class OkunNetworkingTests: XCTestCase {
     let url = URL(fileURLWithPath: "url")
     
     let expectation = XCTestExpectation(description: "Called for data")
-    manager.loadData(from: url) { result in
+    manager.get(from: url) { result in
       expectation.fulfill()
       switch result {
       case .success(let returnedData):
@@ -45,7 +54,31 @@ final class OkunNetworkingTests: XCTestCase {
     wait(for: [expectation], timeout: 5)
   }
   
+  func testPostCall() {
+    let session = NetworkSessionMock()
+    let manager = OkunCore.Networking.Manager(session: session)
+    
+    let payload = MockData(id: 1, name: "David")
+    session.data = try? JSONEncoder().encode(payload)
+    let url = URL(fileURLWithPath: "url")
+    
+    let expectation = XCTestExpectation(description: "Called for sent data")
+    manager.post(to: url, body: payload) { result in
+      expectation.fulfill()
+      switch result {
+      case .success(let returnedData):
+        let returnedPayload = try? JSONDecoder().decode(MockData.self, from: returnedData)
+        XCTAssertEqual(returnedPayload, payload)
+        break
+      case .failure(let error):
+        XCTFail(error.localizedDescription)
+      }
+    }
+    wait(for: [expectation], timeout: 5)
+  }
+  
   static var allTests = [
-    ("testNetworkingCall", testNetworkingCall)
+    ("testGetCall", testGetCall),
+    ("testPostCall", testPostCall)
   ]
 }
